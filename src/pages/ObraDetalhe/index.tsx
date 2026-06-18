@@ -44,13 +44,13 @@ export default function ObraDetalhe() {
   const isLate = work.expected_end_date && new Date(work.expected_end_date) < new Date() && work.status !== 'concluida'
 
   function handleStatusChange(status: string) {
-    updateWork.mutate({ id: work.id, status })
+    updateWork.mutate({ id: work!.id, status })
   }
 
   function getBadgeClass() {
     if (isLate) return 'bg-red-100 text-red-700 border-red-200'
     if (overBudget) return 'bg-orange-100 text-orange-700 border-orange-200'
-    return statusColor[work.status]
+    return statusColor[work!.status]
   }
 
   return (

@@ -2,23 +2,7 @@ import { Link } from 'react-router-dom'
 import { TrendingUp, AlertTriangle, TrendingDown, DollarSign, Clock, Image as ImageIcon } from 'lucide-react'
 import { useDashboard } from '../../services/dashboard'
 import { useAuth } from '../../hooks/useAuth'
-import type { Work, WorkStatus, StageStatus, ExpenseCategory } from '../../types'
-
-const statusDisplay: Record<string, { label: string; color: string }> = {
-  no_prazo: { label: 'No prazo', color: 'text-green-600' },
-  atencao: { label: 'Atenção', color: 'text-orange-500' },
-  atrasada: { label: 'Atrasada', color: 'text-red-600' },
-}
-
-const categoryLabel: Record<ExpenseCategory, string> = {
-  material: 'Material',
-  mao_de_obra: 'Mão de obra',
-  terceiros: 'Terceiros',
-  frete: 'Frete',
-  equipamento: 'Equipamento',
-  imprevisto: 'Imprevisto',
-  outro: 'Outro',
-}
+import type { Work } from '../../types'
 
 export default function Dashboard() {
   const { profile, organization } = useAuth()

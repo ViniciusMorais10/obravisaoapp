@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { ClipboardEdit, Camera, Trash2, X, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
+import { ClipboardEdit, Camera, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { useWorkUpdates, useCreateWorkUpdate, useDeleteWorkUpdate, uploadPhoto } from '../../services/work-updates'
 import { useStages } from '../../services/stages'
