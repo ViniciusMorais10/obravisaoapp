@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, Navigate } from 'react-router-dom'
-import { Building2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -38,9 +37,7 @@ export default function Login() {
       <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 shadow-lg">
         {/* Branding */}
         <div className="mb-6 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800">
-            <Building2 className="h-6 w-6 text-white" />
-          </div>
+          <img src="/favicon.svg" alt="ObraVisão" className="mx-auto h-12 w-12" />
           <h1 className="mt-4 text-xl font-bold text-gray-900">Entrar no ObraVisão</h1>
           <p className="mt-1 text-sm text-gray-500">Controle obras, despesas e atualizações em um só lugar.</p>
         </div>
