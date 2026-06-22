@@ -5,6 +5,7 @@ import type { Expense } from '../../types'
 export type ExpenseInput = {
   work_id: string
   stage_id?: string | null
+  supplier_id?: string | null
   category: string
   description: string
   amount: number
@@ -15,7 +16,7 @@ export type ExpenseInput = {
 async function fetchExpenses(workId: string) {
   const { data, error } = await supabase
     .from('expenses')
-    .select('*')
+    .select('*, supplier:suppliers(name)')
     .eq('work_id', workId)
     .order('date', { ascending: false })
   if (error) throw error
@@ -53,7 +54,7 @@ export function useAllExpenses(organizationId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('expenses')
-        .select('*')
+        .select('*, supplier:suppliers(name)')
         .eq('organization_id', organizationId!)
         .order('date', { ascending: false })
       if (error) throw error

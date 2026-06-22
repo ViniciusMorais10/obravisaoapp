@@ -3,10 +3,13 @@ import { Calendar, Pencil } from 'lucide-react'
 import { useWork, useUpdateWork } from '../../services/works'
 import { useExpenses } from '../../services/expenses'
 import { useStages } from '../../services/stages'
+import { useWorkPayments } from '../../services/work-payments'
 import StagesSection from '../../components/etapas/StagesSection'
 import ExpensesSection from '../../components/despesas/ExpensesSection'
+import PaymentsSection from '../../components/recebimentos/PaymentsSection'
 import UpdatesSection from '../../components/fotos/UpdatesSection'
 import ShareLinkSection from '../../components/obras/ShareLinkSection'
+import WorkTeamSection from '../../components/equipe/WorkTeamSection'
 import type { WorkStatus } from '../../types'
 
 const statusLabel: Record<WorkStatus, string> = {
@@ -28,14 +31,17 @@ export default function ObraDetalhe() {
   const { data: work, isLoading } = useWork(id)
   const { data: expenses } = useExpenses(id)
   const { data: stages } = useStages(id)
+  const { data: payments } = useWorkPayments(id)
   const updateWork = useUpdateWork()
 
   if (isLoading) return <div className="flex flex-col items-center justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800" /><p className="mt-3 text-sm text-gray-500">Carregando obra...</p></div>
   if (!work) return <p className="text-sm text-red-600">Obra não encontrada</p>
 
   const totalSpent = expenses?.reduce((sum, e) => sum + Number(e.amount), 0) ?? 0
+  const totalReceived = payments?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0
   const budget = Number(work.expected_budget ?? 0)
   const saldo = budget - totalSpent
+  const saldoReal = totalReceived - totalSpent
   const overBudget = budget > 0 && totalSpent > budget
 
   const stagesList = stages ?? []
@@ -103,27 +109,38 @@ export default function ObraDetalhe() {
 
         {/* Card financeiro */}
         <div className="rounded-lg border border-gray-200 bg-white p-5">
-          {budget > 0 ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Orçamento previsto</span>
-                <span className="text-sm font-semibold text-gray-800">{budget.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Gasto atual</span>
-                <span className="text-sm font-semibold text-gray-800">{totalSpent.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-              </div>
-              <hr className="border-gray-100" />
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Saldo previsto</span>
-                <span className={`text-lg font-bold ${overBudget ? 'text-red-600' : 'text-green-600'}`}>
-                  {saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </span>
-              </div>
+          <div className="space-y-3">
+            {budget > 0 && (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Orçamento previsto</span>
+                  <span className="text-sm font-semibold text-gray-800">{budget.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Saldo previsto</span>
+                  <span className={`text-sm font-semibold ${overBudget ? 'text-red-600' : 'text-gray-800'}`}>
+                    {saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </span>
+                </div>
+                <hr className="border-gray-100" />
+              </>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-500">Total gasto</span>
+              <span className="text-sm font-semibold text-red-600">{totalSpent.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
             </div>
-          ) : (
-            <p className="text-sm text-gray-400">Orçamento não definido</p>
-          )}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-500">Total recebido</span>
+              <span className="text-sm font-semibold text-green-600">{totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+            </div>
+            <hr className="border-gray-100" />
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">Saldo</span>
+              <span className={`text-lg font-bold ${saldoReal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {saldoReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -137,8 +154,18 @@ export default function ObraDetalhe() {
         </div>
       </div>
 
+      {/* Recebimentos */}
+      <div className="rounded-lg border border-gray-200 bg-white p-5">
+        <PaymentsSection workId={work.id} />
+      </div>
+
       {/* Link de atualização */}
       <ShareLinkSection workId={work.id} />
+
+      {/* Equipe da obra */}
+      <div className="rounded-lg border border-gray-200 bg-white p-5">
+        <WorkTeamSection workId={work.id} />
+      </div>
 
       {/* Atualizações + Fotos */}
       <div className="rounded-lg border border-gray-200 bg-white p-5">

@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { useAuth } from '../../hooks/useAuth'
 import { useWorks } from '../../services/works'
 import { useStages } from '../../services/stages'
+import { useActiveSuppliers } from '../../services/suppliers'
 import { useCreateExpense, validateReceiptFile, uploadReceipt, attachReceipt } from '../../services/expenses'
 import type { ExpenseCategory } from '../../types'
 
@@ -29,6 +30,7 @@ const schema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória'),
   date: z.string().min(1, 'Data é obrigatória'),
   stage_id: z.string().optional(),
+  supplier_id: z.string().optional(),
 })
 
 type FormData = z.infer<typeof schema>
@@ -57,6 +59,7 @@ export default function NovaDespesa() {
 
   const selectedWorkId = watch('work_id')
   const { data: stages } = useStages(selectedWorkId || undefined)
+  const { data: activeSuppliers } = useActiveSuppliers(organization?.id)
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0]
@@ -81,6 +84,7 @@ export default function NovaDespesa() {
       description: data.description,
       date: data.date,
       stage_id: data.stage_id || null,
+      supplier_id: data.supplier_id || null,
     })
 
     // 2. Upload comprovante se houver
@@ -196,6 +200,17 @@ export default function NovaDespesa() {
             <select {...register('stage_id')} className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-slate-500 focus:outline-none">
               <option value="">Nenhuma</option>
               {stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+        )}
+
+        {/* Fornecedor (opcional) */}
+        {activeSuppliers && activeSuppliers.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Fornecedor <span className="text-gray-400">(opcional)</span></label>
+            <select {...register('supplier_id')} className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-slate-500 focus:outline-none">
+              <option value="">Nenhum</option>
+              {activeSuppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
         )}

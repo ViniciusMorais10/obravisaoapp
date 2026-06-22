@@ -1,3 +1,19 @@
+export type SupplierType = 'material' | 'mao_de_obra' | 'servico' | 'equipamento' | 'outro'
+
+export interface Supplier {
+  id: string
+  organization_id: string
+  name: string
+  phone: string | null
+  email: string | null
+  document: string | null
+  type: SupplierType
+  notes: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export type WorkStatus = 'planejada' | 'em_andamento' | 'pausada' | 'concluida'
 
 export type StageStatus = 'nao_iniciada' | 'em_andamento' | 'concluida' | 'atrasada'
@@ -57,12 +73,60 @@ export interface Expense {
   organization_id: string
   work_id: string
   stage_id: string | null
+  supplier_id: string | null
   category: ExpenseCategory
   description: string
   amount: number
   date: string
   receipt_url: string | null
   created_at: string
+  supplier?: { name: string } | null
+}
+
+export type TeamMemberRole = 'pedreiro' | 'ajudante' | 'eletricista' | 'encanador' | 'pintor' | 'mestre_de_obra' | 'engenheiro' | 'arquiteto' | 'outro'
+
+export interface TeamMember {
+  id: string
+  organization_id: string
+  name: string
+  phone: string | null
+  email: string | null
+  role: string
+  notes: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface WorkTeamMember {
+  id: string
+  organization_id: string
+  work_id: string
+  team_member_id: string
+  role_in_work: string | null
+  start_date: string | null
+  end_date: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  team_member?: TeamMember
+}
+
+export type PaymentMethod = 'pix' | 'dinheiro' | 'cartao' | 'boleto' | 'transferencia' | 'outro'
+
+export interface WorkPayment {
+  id: string
+  organization_id: string
+  work_id: string
+  amount: number
+  payment_date: string
+  payment_method: PaymentMethod
+  payer_name: string | null
+  description: string | null
+  notes: string | null
+  attachment_url: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface WorkUpdate {

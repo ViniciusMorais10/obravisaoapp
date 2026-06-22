@@ -14,6 +14,12 @@ import ObraForm from './pages/Obras/ObraForm'
 import ObraDetalhe from './pages/ObraDetalhe'
 import Despesas from './pages/Despesas'
 import NovaDespesa from './pages/Despesas/NovaDespesa'
+import Fornecedores from './pages/Fornecedores'
+import SupplierForm from './pages/Fornecedores/SupplierForm'
+import SupplierDetail from './pages/Fornecedores/SupplierDetail'
+import Equipe from './pages/Equipe'
+import TeamMemberForm from './pages/Equipe/TeamMemberForm'
+import TeamMemberDetail from './pages/Equipe/TeamMemberDetail'
 import PublicUpdate from './pages/PublicUpdate'
 
 const queryClient = new QueryClient({
@@ -48,6 +54,14 @@ export default function App() {
                 <Route path="/obras/:id/editar" element={<ObraForm />} />
                 <Route path="/despesas" element={<Despesas />} />
                 <Route path="/despesas/nova" element={<NovaDespesa />} />
+                <Route path="/fornecedores" element={<Fornecedores />} />
+                <Route path="/fornecedores/novo" element={<SupplierForm />} />
+                <Route path="/fornecedores/:id" element={<SupplierDetail />} />
+                <Route path="/fornecedores/:id/editar" element={<SupplierForm />} />
+                <Route path="/equipe" element={<Equipe />} />
+                <Route path="/equipe/novo" element={<TeamMemberForm />} />
+                <Route path="/equipe/:id" element={<TeamMemberDetail />} />
+                <Route path="/equipe/:id/editar" element={<TeamMemberForm />} />
               </Route>
             </Route>
           </Routes>

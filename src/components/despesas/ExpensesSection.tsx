@@ -97,6 +97,9 @@ export default function ExpensesSection({ workId }: { workId: string }) {
             <div key={exp.id} className="flex items-center justify-between border-b border-gray-50 pb-2 last:border-0">
               <div>
                 <span className="text-sm text-gray-700">{exp.description}</span>
+                {exp.supplier?.name && (
+                  <span className="ml-2 text-xs text-gray-400">· {exp.supplier.name}</span>
+                )}
                 {exp.receipt_url && (
                   <button onClick={() => openReceipt(exp.receipt_url!)} className="ml-2 inline-flex items-center gap-1 rounded-md bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors">
                     <Paperclip className="h-3 w-3" /> Ver comprovante

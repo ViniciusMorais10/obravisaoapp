@@ -1,11 +1,13 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { Building2, LayoutDashboard, HardHat, DollarSign, LogOut } from 'lucide-react'
+import { Building2, LayoutDashboard, HardHat, DollarSign, Truck, Users, LogOut } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/obras', label: 'Obras', icon: HardHat },
   { to: '/despesas', label: 'Despesas', icon: DollarSign },
+  { to: '/fornecedores', label: 'Fornecedores', icon: Truck },
+  { to: '/equipe', label: 'Equipe', icon: Users },
 ]
 
 export default function AppLayout() {

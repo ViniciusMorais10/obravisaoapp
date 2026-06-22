@@ -119,7 +119,7 @@ export default function Despesas() {
                 <div>
                   <p className="text-sm font-medium text-gray-800">{exp.description}</p>
                   <p className="text-xs text-gray-400">
-                    {getWorkName(exp.work_id)} · {categoryLabel[exp.category]} · {new Date(exp.date).toLocaleDateString('pt-BR')}
+                    {getWorkName(exp.work_id)} · {categoryLabel[exp.category]}{exp.supplier?.name ? ` · ${exp.supplier.name}` : ''} · {new Date(exp.date).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
               </div>
