@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { TrendingUp, AlertTriangle, TrendingDown, DollarSign, Clock, Image as ImageIcon } from 'lucide-react'
 import { useDashboard } from '../../services/dashboard'
 import { useAuth } from '../../hooks/useAuth'
+import SubscriptionBanner from '../../components/dashboard/SubscriptionBanner'
 import type { Work } from '../../types'
 
 export default function Dashboard() {
@@ -69,6 +70,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <SubscriptionBanner />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

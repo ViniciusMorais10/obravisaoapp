@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster, toast } from 'sonner'
 import { AuthProvider } from './hooks/useAuth'
 import ProtectedRoute from './components/layout/ProtectedRoute'
+import SubscriptionGuard from './components/layout/SubscriptionGuard'
 import AppLayout from './components/layout/AppLayout'
 import Login from './pages/Login'
 import EsqueciSenha from './pages/Login/EsqueciSenha'
@@ -46,22 +47,24 @@ export default function App() {
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/atualizar/:token" element={<PublicUpdate />} />
             <Route element={<ProtectedRoute />}>
-              <Route element={<AppLayout />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/obras" element={<Obras />} />
-                <Route path="/obras/nova" element={<ObraForm />} />
-                <Route path="/obras/:id" element={<ObraDetalhe />} />
-                <Route path="/obras/:id/editar" element={<ObraForm />} />
-                <Route path="/despesas" element={<Despesas />} />
-                <Route path="/despesas/nova" element={<NovaDespesa />} />
-                <Route path="/fornecedores" element={<Fornecedores />} />
-                <Route path="/fornecedores/novo" element={<SupplierForm />} />
-                <Route path="/fornecedores/:id" element={<SupplierDetail />} />
-                <Route path="/fornecedores/:id/editar" element={<SupplierForm />} />
-                <Route path="/equipe" element={<Equipe />} />
-                <Route path="/equipe/novo" element={<TeamMemberForm />} />
-                <Route path="/equipe/:id" element={<TeamMemberDetail />} />
-                <Route path="/equipe/:id/editar" element={<TeamMemberForm />} />
+              <Route element={<SubscriptionGuard />}>
+                <Route element={<AppLayout />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/obras" element={<Obras />} />
+                  <Route path="/obras/nova" element={<ObraForm />} />
+                  <Route path="/obras/:id" element={<ObraDetalhe />} />
+                  <Route path="/obras/:id/editar" element={<ObraForm />} />
+                  <Route path="/despesas" element={<Despesas />} />
+                  <Route path="/despesas/nova" element={<NovaDespesa />} />
+                  <Route path="/fornecedores" element={<Fornecedores />} />
+                  <Route path="/fornecedores/novo" element={<SupplierForm />} />
+                  <Route path="/fornecedores/:id" element={<SupplierDetail />} />
+                  <Route path="/fornecedores/:id/editar" element={<SupplierForm />} />
+                  <Route path="/equipe" element={<Equipe />} />
+                  <Route path="/equipe/novo" element={<TeamMemberForm />} />
+                  <Route path="/equipe/:id" element={<TeamMemberDetail />} />
+                  <Route path="/equipe/:id/editar" element={<TeamMemberForm />} />
+                </Route>
               </Route>
             </Route>
           </Routes>

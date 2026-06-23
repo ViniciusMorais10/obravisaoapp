@@ -139,3 +139,22 @@ export interface WorkUpdate {
   author_name: string | null
   created_at: string
 }
+
+export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'expired'
+
+export interface Subscription {
+  id: string
+  organization_id: string
+  status: SubscriptionStatus
+  plan_name: string
+  plan_price: number
+  trial_start: string
+  trial_end: string
+  paid_until: string | null
+  grace_period_until: string | null
+  payment_provider: string | null
+  provider_customer_id: string | null
+  provider_subscription_id: string | null
+  created_at: string
+  updated_at: string
+}
