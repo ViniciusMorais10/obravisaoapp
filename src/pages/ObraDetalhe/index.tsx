@@ -9,6 +9,7 @@ import ExpensesSection from '../../components/despesas/ExpensesSection'
 import PaymentsSection from '../../components/recebimentos/PaymentsSection'
 import UpdatesSection from '../../components/fotos/UpdatesSection'
 import ShareLinkSection from '../../components/obras/ShareLinkSection'
+import PublicShareSection from '../../components/obras/PublicShareSection'
 import WorkTeamSection from '../../components/equipe/WorkTeamSection'
 import type { WorkStatus } from '../../types'
 
@@ -161,6 +162,9 @@ export default function ObraDetalhe() {
 
       {/* Link de atualização */}
       <ShareLinkSection workId={work.id} />
+
+      {/* Link de acompanhamento público */}
+      <PublicShareSection workId={work.id} publicShareEnabled={work.public_share_enabled} publicShareToken={work.public_share_token} />
 
       {/* Equipe da obra */}
       <div className="rounded-lg border border-gray-200 bg-white p-5">

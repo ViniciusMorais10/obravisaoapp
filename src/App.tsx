@@ -22,6 +22,7 @@ import Equipe from './pages/Equipe'
 import TeamMemberForm from './pages/Equipe/TeamMemberForm'
 import TeamMemberDetail from './pages/Equipe/TeamMemberDetail'
 import PublicUpdate from './pages/PublicUpdate'
+import Acompanhamento from './pages/Acompanhamento'
 
 const queryClient = new QueryClient({
   mutationCache: new MutationCache({
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="/redefinir-senha" element={<RedefinirSenha />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/atualizar/:token" element={<PublicUpdate />} />
+            <Route path="/acompanhamento/:token" element={<Acompanhamento />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<SubscriptionGuard />}>
                 <Route element={<AppLayout />}>

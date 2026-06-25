@@ -51,6 +51,10 @@ export interface Work {
   expected_end_date: string | null
   expected_budget: number | null
   status: WorkStatus
+  public_share_enabled: boolean
+  public_share_token: string | null
+  public_share_created_at: string | null
+  public_share_updated_at: string | null
   created_at: string
   updated_at: string
 }

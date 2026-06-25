@@ -17,6 +17,7 @@ export default function UpdatesSection({ workId }: { workId: string }) {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const photos = (updates ?? []).filter((u) => u.photo_url)
@@ -139,7 +140,7 @@ export default function UpdatesSection({ workId }: { workId: string }) {
                     )}
                   </div>
                 </div>
-                <button onClick={() => deleteUpdate.mutate(upd.id)} className="shrink-0 text-gray-300 hover:text-red-500">
+                <button onClick={() => setDeleteId(upd.id)} className="shrink-0 text-gray-300 hover:text-red-500">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -179,7 +180,7 @@ export default function UpdatesSection({ workId }: { workId: string }) {
           </button>
 
           <button
-            onClick={(e) => { e.stopPropagation(); deleteUpdate.mutate(photos[activeIndex].id); setActiveIndex(null) }}
+            onClick={(e) => { e.stopPropagation(); setDeleteId(photos[activeIndex].id) }}
             className="absolute left-4 top-4 flex items-center gap-1 rounded bg-red-600/80 px-2 py-1 text-xs text-white hover:bg-red-600"
           >
             <Trash2 className="h-3 w-3" /> Excluir
@@ -206,6 +207,29 @@ export default function UpdatesSection({ workId }: { workId: string }) {
               <ChevronRight className="h-6 w-6" />
             </button>
           )}
+        </div>
+      )}
+      {/* Modal confirmação de exclusão */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={() => setDeleteId(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-800">Excluir atualização</h3>
+            <p className="mt-2 text-sm text-gray-500">Tem certeza que deseja excluir esta atualização? Essa ação não pode ser desfeita.</p>
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={() => setDeleteId(null)}
+                className="flex-1 rounded-lg border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { deleteUpdate.mutate(deleteId); setDeleteId(null); setActiveIndex(null) }}
+                className="flex-1 rounded-lg bg-red-600 py-2.5 text-sm font-medium text-white hover:bg-red-700"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>
