@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, CheckCircle2, Circle, Loader2, Trash2 } from 'lucide-react'
 import { useStages, useCreateStage, useUpdateStage, useDeleteStage } from '../../services/stages'
+import { useStageTemplates, useCreateStageTemplate } from '../../services/stage-templates'
 import { useAuth } from '../../hooks/useAuth'
 import type { StageStatus } from '../../types'
 
@@ -34,20 +35,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const SUGGESTED_STAGES = [
-  'Serviços Preliminares',
-  'Demolição e Construção',
-  'Instalações Elétricas',
-  'Instalações Hidrossanitárias',
-  'Instalações Frigorígenas',
-  'Serviços de Forro',
-  'Serviços de Revestimento',
-  'Serviços de Louças e Metais',
-  'Instalação de Acabamentos Elétricos',
-  'Serviços de Iluminação',
-  'Serviços de Emassamento e Pintura',
-  'Finalização',
-]
+const CREATE_NEW_VALUE = '__create_new__'
 
 export default function StagesSection({ workId }: { workId: string }) {
   const { organization } = useAuth()
@@ -55,11 +43,36 @@ export default function StagesSection({ workId }: { workId: string }) {
   const createStage = useCreateStage()
   const updateStage = useUpdateStage(workId)
   const deleteStage = useDeleteStage(workId)
+  const { data: templates } = useStageTemplates()
+  const createTemplate = useCreateStageTemplate()
   const [showForm, setShowForm] = useState(false)
+  const [showCustomInput, setShowCustomInput] = useState(false)
+  const [customName, setCustomName] = useState('')
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  const availableTemplates = templates ?? []
+
+  function handleSelectChange(value: string) {
+    if (value === CREATE_NEW_VALUE) {
+      setShowCustomInput(true)
+      setValue('name', '')
+    } else if (value) {
+      setShowCustomInput(false)
+      setValue('name', value)
+    }
+  }
+
+  async function handleCreateCustom() {
+    const trimmed = customName.trim()
+    if (!trimmed || !organization) return
+    await createTemplate.mutateAsync({ organization_id: organization.id, name: trimmed })
+    setValue('name', trimmed)
+    setCustomName('')
+    setShowCustomInput(false)
+  }
 
   async function onSubmit(data: FormData) {
     await createStage.mutateAsync({
@@ -70,6 +83,7 @@ export default function StagesSection({ workId }: { workId: string }) {
     })
     reset()
     setShowForm(false)
+    setShowCustomInput(false)
   }
 
   function handleStatusChange(id: string, status: string) {
@@ -94,16 +108,37 @@ export default function StagesSection({ workId }: { workId: string }) {
       {showForm && (
         <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-2 rounded-md border border-gray-200 bg-gray-50 p-3">
           <select
-            onChange={(e) => { if (e.target.value) setValue('name', e.target.value) }}
+            onChange={(e) => handleSelectChange(e.target.value)}
             defaultValue=""
             className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-700"
           >
-            <option value="" disabled>Selecione uma etapa sugerida...</option>
-            {SUGGESTED_STAGES.filter((s) => !stages?.some((st) => st.name === s)).map((s) => (
-              <option key={s} value={s}>{s}</option>
+            <option value="" disabled>Selecione uma etapa...</option>
+            {availableTemplates.map((t) => (
+              <option key={t.id} value={t.name}>{t.name}</option>
             ))}
+            <option value={CREATE_NEW_VALUE}>+ Criar nova etapa</option>
           </select>
-          <input {...register('name')} placeholder="Ou digite o nome manualmente" className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+
+          {showCustomInput && (
+            <div className="flex gap-2">
+              <input
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="Nome da nova etapa"
+                className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleCreateCustom}
+                disabled={createTemplate.isPending || !customName.trim()}
+                className="rounded bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-50"
+              >
+                Criar
+              </button>
+            </div>
+          )}
+
+          <input type="hidden" {...register('name')} />
           {errors.name && <p className="text-xs text-red-600">{errors.name.message}</p>}
           <div className="flex gap-2">
             <input type="date" {...register('expected_date')} className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm" />
