@@ -37,9 +37,9 @@ export default function ShareLinkSection({ workId }: { workId: string }) {
     <section className="rounded-lg border border-gray-200 bg-white p-5">
       <div className="flex items-center gap-2">
         <Link2 className="h-5 w-5 text-slate-700" />
-        <h2 className="font-semibold text-gray-800">Link de atualização da obra</h2>
+        <h2 className="font-semibold text-gray-800">Link de RDO da obra</h2>
       </div>
-      <p className="mt-1 text-xs text-gray-500">Envie este link para quem precisa registrar atualizações desta obra. A pessoa não terá acesso ao painel completo.</p>
+      <p className="mt-1 text-xs text-gray-500">Envie este link para quem precisa registrar RDOs desta obra. A pessoa não terá acesso ao painel completo.</p>
 
       {link ? (
         <div className="mt-4 space-y-3">
@@ -61,7 +61,7 @@ export default function ShareLinkSection({ workId }: { workId: string }) {
         </div>
       ) : (
         <button onClick={handleGenerate} disabled={generateLink.isPending} className="mt-4 flex items-center gap-1.5 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50">
-          <Link2 className="h-4 w-4" /> {generateLink.isPending ? 'Gerando...' : 'Gerar link de atualização'}
+          <Link2 className="h-4 w-4" /> {generateLink.isPending ? 'Gerando...' : 'Gerar link de RDO'}
         </button>
       )}
     </section>

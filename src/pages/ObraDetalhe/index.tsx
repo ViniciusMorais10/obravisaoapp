@@ -160,7 +160,7 @@ export default function ObraDetalhe() {
         <PaymentsSection workId={work.id} />
       </div>
 
-      {/* Link de atualização */}
+      {/* Link de RDO */}
       <ShareLinkSection workId={work.id} />
 
       {/* Link de acompanhamento público */}
@@ -171,7 +171,7 @@ export default function ObraDetalhe() {
         <WorkTeamSection workId={work.id} />
       </div>
 
-      {/* Atualizações + Fotos */}
+      {/* RDO / Diário da Obra + Fotos */}
       <div className="rounded-lg border border-gray-200 bg-white p-5">
         <UpdatesSection workId={work.id} />
       </div>

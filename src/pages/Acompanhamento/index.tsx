@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { Building2, AlertTriangle, Calendar, Camera } from 'lucide-react'
+import { Building2, AlertTriangle, Calendar, Camera, FileText } from 'lucide-react'
 import { usePublicWork, usePublicUpdates, usePublicStages } from '../../services/public-share'
 
 const statusLabel: Record<string, string> = {
@@ -45,6 +45,20 @@ export default function Acompanhamento() {
   const progress = stages?.length
     ? Math.round(stages.reduce((s, st) => s + st.percentage, 0) / stages.length)
     : 0
+
+  // Collect all photos from updates
+  const allPhotos: { url: string; description: string; date: string }[] = []
+  updates?.forEach((upd) => {
+    const date = upd.report_date
+      ? new Date(upd.report_date + 'T12:00:00').toLocaleDateString('pt-BR')
+      : new Date(upd.created_at).toLocaleDateString('pt-BR')
+    if (upd.photo_url) allPhotos.push({ url: upd.photo_url, description: upd.description, date })
+    if (upd.photo_urls) {
+      upd.photo_urls.forEach((url: string) => {
+        if (url !== upd.photo_url) allPhotos.push({ url, description: upd.description, date })
+      })
+    }
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -106,42 +120,110 @@ export default function Acompanhamento() {
           </div>
         )}
 
-        {/* Atualizações */}
+        {/* RDOs - Linha do tempo */}
         <div className="rounded-lg border border-gray-200 bg-white p-5">
-          <h2 className="font-semibold text-gray-800">Últimas atualizações</h2>
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-gray-600" />
+            <h2 className="font-semibold text-gray-800">RDO / Diário da Obra</h2>
+          </div>
           {!updates?.length ? (
-            <p className="mt-3 text-sm text-gray-400">Nenhuma atualização registrada ainda.</p>
+            <p className="mt-3 text-sm text-gray-400">Nenhum registro diário disponível.</p>
           ) : (
-            <div className="mt-3 space-y-4">
-              {updates.map((upd) => (
-                <div key={upd.id} className="border-b border-gray-50 pb-4 last:border-0 last:pb-0">
-                  <p className="text-sm text-gray-800">{upd.description}</p>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-gray-400">
-                    {upd.author_name && <span className="font-medium text-gray-600">{upd.author_name}</span>}
-                    <span>{new Date(upd.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span>
-                  </div>
-                  {upd.photo_url && (
-                    <div className="mt-2 overflow-hidden rounded-lg border border-gray-100">
-                      <img src={upd.photo_url} alt="" className="w-full max-w-md object-cover" />
+            <div className="mt-4 relative">
+              {/* Timeline line */}
+              <div className="absolute left-3 top-2 bottom-2 w-px bg-gray-200" />
+
+              <div className="space-y-6">
+                {updates.map((upd) => {
+                  const displayDate = upd.report_date
+                    ? new Date(upd.report_date + 'T12:00:00').toLocaleDateString('pt-BR')
+                    : new Date(upd.created_at).toLocaleDateString('pt-BR')
+
+                  const photos: string[] = []
+                  if (upd.photo_url) photos.push(upd.photo_url)
+                  if (upd.photo_urls) upd.photo_urls.forEach((url: string) => { if (url !== upd.photo_url) photos.push(url) })
+
+                  return (
+                    <div key={upd.id} className="relative pl-8">
+                      {/* Timeline dot */}
+                      <div className="absolute left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-slate-600 bg-white" />
+
+                      <div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                        {/* Data e responsável */}
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span className="rounded bg-slate-100 px-2 py-0.5 font-medium text-slate-700">
+                            {displayDate}
+                          </span>
+                          {(upd.responsible || upd.author_name) && (
+                            <span className="text-gray-600">{upd.responsible || upd.author_name}</span>
+                          )}
+                        </div>
+
+                        {/* Descrição */}
+                        <p className="mt-2 text-sm text-gray-800">{upd.description}</p>
+
+                        {/* Campos expandidos */}
+                        {upd.activities_done && (
+                          <div className="mt-2">
+                            <span className="text-xs font-medium text-gray-500">Atividades executadas:</span>
+                            <p className="text-sm text-gray-700">{upd.activities_done}</p>
+                          </div>
+                        )}
+                        {upd.issues && (
+                          <div className="mt-2">
+                            <span className="text-xs font-medium text-orange-600">Ocorrências:</span>
+                            <p className="text-sm text-gray-700">{upd.issues}</p>
+                          </div>
+                        )}
+                        {upd.next_activities && (
+                          <div className="mt-2">
+                            <span className="text-xs font-medium text-gray-500">Próximas atividades:</span>
+                            <p className="text-sm text-gray-700">{upd.next_activities}</p>
+                          </div>
+                        )}
+                        {upd.observations && (
+                          <div className="mt-2">
+                            <span className="text-xs font-medium text-gray-500">Observações:</span>
+                            <p className="text-sm text-gray-700">{upd.observations}</p>
+                          </div>
+                        )}
+
+                        {/* Fotos do RDO */}
+                        {photos.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {photos.map((url, idx) => (
+                              <a
+                                key={idx}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="overflow-hidden rounded-lg border border-gray-100 hover:opacity-80 transition-opacity"
+                              >
+                                <img src={url} alt="" className="h-20 w-28 object-cover sm:h-24 sm:w-36" />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>
 
         {/* Galeria de fotos */}
-        {updates && updates.filter((u) => u.photo_url).length > 0 && (
+        {allPhotos.length > 0 && (
           <div className="rounded-lg border border-gray-200 bg-white p-5">
             <div className="flex items-center gap-2">
               <Camera className="h-4 w-4 text-gray-600" />
               <h2 className="font-semibold text-gray-800">Fotos</h2>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {updates.filter((u) => u.photo_url).map((u) => (
-                <a key={u.id} href={u.photo_url!} target="_blank" rel="noopener noreferrer" className="aspect-square overflow-hidden rounded-lg border border-gray-100 hover:opacity-80 transition-opacity">
-                  <img src={u.photo_url!} alt="" className="h-full w-full object-cover" />
+              {allPhotos.map((photo, idx) => (
+                <a key={idx} href={photo.url} target="_blank" rel="noopener noreferrer" className="aspect-square overflow-hidden rounded-lg border border-gray-100 hover:opacity-80 transition-opacity">
+                  <img src={photo.url} alt="" className="h-full w-full object-cover" />
                 </a>
               ))}
             </div>

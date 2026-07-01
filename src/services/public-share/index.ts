@@ -60,7 +60,7 @@ export async function fetchWorkByPublicToken(token: string) {
 export async function fetchPublicUpdates(workId: string) {
   const { data, error } = await supabase
     .from('work_updates')
-    .select('id, description, photo_url, author_name, created_at, stage_id')
+    .select('id, description, photo_url, photo_urls, author_name, report_date, responsible, activities_done, issues, next_activities, observations, created_at, stage_id')
     .eq('work_id', workId)
     .order('created_at', { ascending: false })
   if (error) throw error

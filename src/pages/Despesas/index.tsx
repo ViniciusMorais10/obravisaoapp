@@ -6,7 +6,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useAllExpenses, getReceiptUrl } from '../../services/expenses'
 import { useWorks } from '../../services/works'
 import { supabase } from '../../lib/supabase'
-import type { ExpenseCategory } from '../../types'
+import type { Expense, ExpenseCategory } from '../../types'
 
 const categoryLabel: Record<ExpenseCategory, string> = {
   material: 'Material',
@@ -18,10 +18,38 @@ const categoryLabel: Record<ExpenseCategory, string> = {
   outro: 'Outro',
 }
 
+type PeriodFilter = 'mes_atual' | 'mes_anterior' | 'acumulado'
+
+const periodOptions: { value: PeriodFilter; label: string }[] = [
+  { value: 'mes_atual', label: 'Mês atual' },
+  { value: 'mes_anterior', label: 'Mês anterior' },
+  { value: 'acumulado', label: 'Acumulado' },
+]
+
+function filterByPeriod(expenses: Expense[], period: PeriodFilter): Expense[] {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() // 0-indexed
+
+  return expenses.filter((e) => {
+    const [year, month] = e.date.split('-').map(Number)
+    const expMonth = month - 1
+
+    if (period === 'mes_atual') return expMonth === currentMonth && year === currentYear
+    if (period === 'mes_anterior') {
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear
+      return expMonth === prevMonth && year === prevYear
+    }
+    return true // acumulado
+  })
+}
+
 export default function Despesas() {
   const { organization } = useAuth()
   const { data: expenses, isLoading } = useAllExpenses(organization?.id)
   const { data: works } = useWorks(organization?.id)
+  const [period, setPeriod] = useState<PeriodFilter>('mes_atual')
   const [filterWork, setFilterWork] = useState<string>('todas')
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const queryClient = useQueryClient()
@@ -39,27 +67,45 @@ export default function Despesas() {
     setDeleteId(null)
   }
 
-  if (isLoading) return <div className="flex flex-col items-center justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800" /><p className="mt-3 text-sm text-gray-500">Carregando despesas...</p></div>
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center py-20">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800" />
+      <p className="mt-3 text-sm text-gray-500">Carregando despesas...</p>
+    </div>
+  )
 
   const now = new Date()
   const today = now.toISOString().split('T')[0]
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
 
   const allExpenses = expenses ?? []
-  const filtered = filterWork === 'todas' ? allExpenses : allExpenses.filter((e) => e.work_id === filterWork)
 
-  const monthExpenses = allExpenses.filter((e) => e.date >= monthStart)
-  const todayExpenses = allExpenses.filter((e) => e.date === today)
-  const totalMonth = monthExpenses.reduce((s, e) => s + Number(e.amount), 0)
-  const totalToday = todayExpenses.reduce((s, e) => s + Number(e.amount), 0)
+  // Filtro de período
+  const periodFiltered = filterByPeriod(allExpenses, period)
 
-  // Obra com maior gasto
+  // Filtro de obra combinado com período
+  const filtered = filterWork === 'todas'
+    ? periodFiltered
+    : periodFiltered.filter((e) => e.work_id === filterWork)
+
+  // Ordenar por lançamento mais recente
+  const sortedFiltered = filtered
+    .slice()
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  // Cards de resumo
+  const totalPeriod = periodFiltered.reduce((s, e) => s + Number(e.amount), 0)
+  const totalToday = allExpenses.filter((e) => e.date === today).reduce((s, e) => s + Number(e.amount), 0)
+  const totalAccumulated = allExpenses.reduce((s, e) => s + Number(e.amount), 0)
+
+  // Obra com maior gasto no período
   const workSpent = new Map<string, number>()
-  allExpenses.forEach((e) => workSpent.set(e.work_id, (workSpent.get(e.work_id) ?? 0) + Number(e.amount)))
+  periodFiltered.forEach((e) => workSpent.set(e.work_id, (workSpent.get(e.work_id) ?? 0) + Number(e.amount)))
   let topWork = ''
   let topAmount = 0
   workSpent.forEach((amount, workId) => { if (amount > topAmount) { topAmount = amount; topWork = workId } })
   const topWorkName = works?.find((w) => w.id === topWork)?.name ?? '—'
+
+  const periodLabel = period === 'mes_atual' ? 'Mês atual' : period === 'mes_anterior' ? 'Mês anterior' : 'Acumulado'
 
   function getWorkName(workId: string) {
     return works?.find((w) => w.id === workId)?.name ?? ''
@@ -78,12 +124,29 @@ export default function Despesas() {
         </Link>
       </div>
 
+      {/* Filtro de período */}
+      <div className="flex gap-2">
+        {periodOptions.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setPeriod(value)}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              period === value
+                ? 'bg-slate-800 text-white'
+                : 'bg-white text-gray-500 border border-gray-200 hover:border-slate-400 hover:text-gray-800'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* Cards de resumo */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <SummaryCard icon={<DollarSign className="h-5 w-5 text-red-500" />} label="Despesas do mês" value={totalMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} />
+        <SummaryCard icon={<DollarSign className="h-5 w-5 text-red-500" />} label={`Despesas · ${periodLabel}`} value={totalPeriod.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} />
         <SummaryCard icon={<Calendar className="h-5 w-5 text-orange-500" />} label="Despesas de hoje" value={totalToday.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} />
-        <SummaryCard icon={<Building2 className="h-5 w-5 text-blue-500" />} label="Maior gasto" value={topWorkName} />
-        <SummaryCard icon={<Receipt className="h-5 w-5 text-green-600" />} label="Total lançado" value={allExpenses.reduce((s, e) => s + Number(e.amount), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} />
+        <SummaryCard icon={<Building2 className="h-5 w-5 text-blue-500" />} label={`Maior gasto · ${periodLabel}`} value={topWorkName} />
+        <SummaryCard icon={<Receipt className="h-5 w-5 text-green-600" />} label="Total acumulado" value={totalAccumulated.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} />
       </div>
 
       {/* Filtro por obra */}
@@ -106,11 +169,11 @@ export default function Despesas() {
       </div>
 
       {/* Lista de despesas */}
-      {!filtered.length ? (
-        <p className="text-center text-sm text-gray-400">Nenhuma despesa encontrada.</p>
+      {!sortedFiltered.length ? (
+        <p className="text-center text-sm text-gray-400">Nenhuma despesa encontrada para o período selecionado.</p>
       ) : (
         <div className="space-y-2">
-          {filtered.map((exp) => (
+          {sortedFiltered.map((exp) => (
             <div key={exp.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50">
@@ -119,7 +182,7 @@ export default function Despesas() {
                 <div>
                   <p className="text-sm font-medium text-gray-800">{exp.description}</p>
                   <p className="text-xs text-gray-400">
-                    {getWorkName(exp.work_id)} · {categoryLabel[exp.category]}{exp.supplier?.name ? ` · ${exp.supplier.name}` : ''} · {new Date(exp.date).toLocaleDateString('pt-BR')}
+                    {getWorkName(exp.work_id)} · {categoryLabel[exp.category]}{exp.supplier?.name ? ` · ${exp.supplier.name}` : ''} · {exp.date.split('-').reverse().join('/')}
                   </p>
                 </div>
               </div>
@@ -140,7 +203,8 @@ export default function Despesas() {
           ))}
         </div>
       )}
-      {/* Modal de confirmação */}
+
+      {/* Modal de confirmação de exclusão */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setDeleteId(null)}>
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">

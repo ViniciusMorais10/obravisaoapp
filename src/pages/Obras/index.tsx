@@ -78,9 +78,19 @@ export default function Obras() {
       </div>
 
       {!filteredWorks?.length ? (
-        <div className="mt-12 text-center">
-          <p className="text-gray-400">Nenhuma obra cadastrada ainda.</p>
-          <Link to="/obras/nova" className="mt-2 inline-block text-sm text-slate-700 underline">Criar primeira obra</Link>
+        <div className="mt-12 flex flex-col items-center justify-center text-center">
+          {filter === 'todas' ? (
+            <>
+              <p className="text-gray-400">Nenhuma obra cadastrada ainda.</p>
+              <Link to="/obras/nova" className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
+                <Plus className="h-4 w-4" /> Criar primeira obra
+              </Link>
+            </>
+          ) : (
+            <p className="text-gray-400">
+              Nenhuma obra com status <span className="font-medium text-gray-600">"{statusLabel[filter]}"</span> encontrada.
+            </p>
+          )}
         </div>
       ) : (
         <div className="mt-5 space-y-3">

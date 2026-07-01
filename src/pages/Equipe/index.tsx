@@ -72,6 +72,11 @@ export default function Equipe() {
                   <p className="text-xs text-gray-400">
                     {roleLabel[member.role] ?? member.role}
                     {member.phone && ` · ${member.phone}`}
+                    {member.daily_rate != null && (
+                      <span className="ml-1 font-medium text-gray-500">
+                        · {Number(member.daily_rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/dia
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>

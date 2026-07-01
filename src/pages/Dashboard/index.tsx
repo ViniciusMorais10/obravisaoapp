@@ -1,13 +1,38 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TrendingUp, AlertTriangle, TrendingDown, DollarSign, Clock, Image as ImageIcon } from 'lucide-react'
 import { useDashboard } from '../../services/dashboard'
 import { useAuth } from '../../hooks/useAuth'
 import SubscriptionBanner from '../../components/dashboard/SubscriptionBanner'
-import type { Work } from '../../types'
+import type { Work, Expense } from '../../types'
+
+type PeriodFilter = 'mes_atual' | 'mes_anterior' | 'acumulado'
+
+function filterExpensesByPeriod(expenses: Expense[], period: PeriodFilter): Expense[] {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() // 0-indexed
+
+  return expenses.filter((e) => {
+    const [year, month] = e.date.split('-').map(Number)
+    const expMonth = month - 1 // converter para 0-indexed
+
+    if (period === 'mes_atual') {
+      return expMonth === currentMonth && year === currentYear
+    }
+    if (period === 'mes_anterior') {
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear
+      return expMonth === prevMonth && year === prevYear
+    }
+    return true // acumulado: todas
+  })
+}
 
 export default function Dashboard() {
   const { profile, organization } = useAuth()
   const { data, isLoading } = useDashboard(organization?.id)
+  const [period, setPeriod] = useState<PeriodFilter>('mes_atual')
 
   if (isLoading) {
     return (
@@ -30,8 +55,7 @@ export default function Dashboard() {
     const spent = expenses.filter((e) => e.work_id === w.id).reduce((s, e) => s + Number(e.amount), 0)
     return spent > Number(w.expected_budget)
   })
-  const totalSpentMonth = expenses
-    .filter((e) => { const d = new Date(e.date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() })
+  const totalSpentMonth = filterExpensesByPeriod(expenses, period)
     .reduce((s, e) => s + Number(e.amount), 0)
 
   // Etapas paradas: em_andamento ou nao_iniciada sem atualização recente
@@ -46,7 +70,10 @@ export default function Dashboard() {
     .sort((a, b) => b.daysStopped - a.daysStopped)
     .slice(0, 5)
 
-  const recentExpenses = expenses.slice(0, 4)
+  const recentExpenses = filterExpensesByPeriod(expenses, period)
+    .slice()
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 4)
   const recentPhotos = workUpdates.filter((u) => u.photo_url).slice(0, 4)
 
   function getWorkSpent(workId: string) {
@@ -88,18 +115,39 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Filtro de período */}
+      <div className="flex gap-2">
+        {([
+          { value: 'mes_atual', label: 'Mês atual' },
+          { value: 'mes_anterior', label: 'Mês anterior' },
+          { value: 'acumulado', label: 'Acumulado' },
+        ] as { value: PeriodFilter; label: string }[]).map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setPeriod(value)}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              period === value
+                ? 'bg-slate-800 text-white'
+                : 'bg-white text-gray-500 border border-gray-200 hover:border-slate-400 hover:text-gray-800'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* Cards resumo */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <SummaryCard icon={<TrendingUp className="h-5 w-5 text-blue-500" />} label="Obras em andamento" value={activeWorks.length} />
         <SummaryCard icon={<AlertTriangle className="h-5 w-5 text-red-500" />} label="Obras atrasadas" value={lateWorks.length} />
         <SummaryCard icon={<TrendingDown className="h-5 w-5 text-orange-500" />} label="Acima do previsto" value={overBudgetWorks.length} />
-        <SummaryCard icon={<DollarSign className="h-5 w-5 text-red-500" />} label="Despesas do mês" value={totalSpentMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} />
+        <SummaryCard icon={<DollarSign className="h-5 w-5 text-red-500" />} label={period === 'mes_atual' ? 'Despesas do mês' : period === 'mes_anterior' ? 'Despesas mês anterior' : 'Despesas acumuladas'} value={totalSpentMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} />
       </div>
 
       {/* Última atualização */}
       {workUpdates[0] && (
         <p className="flex items-center gap-1 text-xs text-gray-400">
-          <Clock className="h-3 w-3" /> Última atualização: {new Date(workUpdates[0].created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+          <Clock className="h-3 w-3" /> Último RDO: {new Date(workUpdates[0].created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
         </p>
       )}
 
@@ -226,7 +274,9 @@ export default function Dashboard() {
         {/* Despesas recentes */}
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <h3 className="font-semibold text-gray-800">Despesas recentes</h3>
-          <p className="text-xs text-gray-500">Últimos lançamentos no mês</p>
+          <p className="text-xs text-gray-500">
+            {period === 'mes_atual' ? 'Mês atual' : period === 'mes_anterior' ? 'Mês anterior' : 'Acumulado'} · últimos lançamentos
+          </p>
           {!recentExpenses.length ? (
             <p className="mt-3 text-sm text-gray-400">Nenhuma despesa lançada</p>
           ) : (

@@ -70,12 +70,19 @@ export default function WorkTeamSection({ workId }: { workId: string }) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-800">{wm.team_member?.name}</p>
-                  <p className="text-xs text-gray-400">
-                    {roleLabel[wm.team_member?.role ?? ''] ?? wm.team_member?.role}
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
+                    <span>{roleLabel[wm.team_member?.role ?? ''] ?? wm.team_member?.role}</span>
                     {wm.team_member?.phone && (
-                      <span className="ml-1 inline-flex items-center gap-0.5"><Phone className="inline h-3 w-3" /> {wm.team_member.phone}</span>
+                      <span className="flex items-center gap-0.5">
+                        <Phone className="h-3 w-3" /> {wm.team_member.phone}
+                      </span>
                     )}
-                  </p>
+                    {wm.team_member?.daily_rate != null && (
+                      <span className="font-medium text-gray-500">
+                        {Number(wm.team_member.daily_rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/dia
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <button

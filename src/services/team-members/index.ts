@@ -7,6 +7,7 @@ export type TeamMemberInput = {
   phone?: string | null
   email?: string | null
   role: string
+  daily_rate?: number | null
   notes?: string | null
 }
 

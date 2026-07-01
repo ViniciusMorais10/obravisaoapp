@@ -62,7 +62,7 @@ export default function PublicUpdate() {
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
         <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-8 text-center shadow-lg">
           <AlertTriangle className="mx-auto h-10 w-10 text-orange-500" />
-          <p className="mt-4 text-sm text-gray-700">Este link de atualização não está mais disponível.</p>
+          <p className="mt-4 text-sm text-gray-700">Este link de RDO não está mais disponível.</p>
           <p className="mt-1 text-xs text-gray-500">Solicite um novo link ao responsável pela obra.</p>
         </div>
       </div>
@@ -74,9 +74,9 @@ export default function PublicUpdate() {
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
         <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-8 text-center shadow-lg">
           <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-          <p className="mt-4 text-lg font-semibold text-gray-800">Atualização enviada com sucesso!</p>
+          <p className="mt-4 text-lg font-semibold text-gray-800">RDO enviado com sucesso!</p>
           <button onClick={handleAnother} className="mt-6 rounded-lg bg-slate-800 px-6 py-2.5 text-sm font-medium text-white hover:bg-slate-700">
-            Enviar outra atualização
+            Enviar outro RDO
           </button>
         </div>
       </div>
@@ -91,7 +91,7 @@ export default function PublicUpdate() {
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800">
             <Building2 className="h-5 w-5 text-white" />
           </div>
-          <h1 className="mt-3 text-lg font-bold text-gray-900">Atualização da obra</h1>
+          <h1 className="mt-3 text-lg font-bold text-gray-900">RDO / Diário da Obra</h1>
           <p className="mt-1 text-sm text-gray-500">Preencha o resumo do que foi feito hoje.</p>
         </div>
 
@@ -114,7 +114,7 @@ export default function PublicUpdate() {
           </div>
 
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-800 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50">
-            {isSubmitting ? 'Enviando...' : 'Enviar atualização'}
+            {isSubmitting ? 'Enviando...' : 'Enviar RDO'}
           </button>
         </form>
       </div>

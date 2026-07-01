@@ -89,6 +89,14 @@ export default function TeamMemberDetail() {
                 <Mail className="h-4 w-4 text-gray-400" /> {member.email}
               </div>
             )}
+            {member.daily_rate != null && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 sm:col-span-2">
+                <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">Diária</span>
+                <span className="font-semibold text-gray-800">
+                  {Number(member.daily_rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </span>
+              </div>
+            )}
           </div>
 
           {member.notes && (

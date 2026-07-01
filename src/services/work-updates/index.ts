@@ -4,10 +4,18 @@ import type { WorkUpdate } from '../../types'
 
 export type WorkUpdateInput = {
   work_id: string
+  organization_id: string
   stage_id?: string | null
   description: string
   photo_url?: string | null
+  photo_urls?: string[] | null
   author_name?: string | null
+  report_date?: string | null
+  responsible?: string | null
+  activities_done?: string | null
+  issues?: string | null
+  next_activities?: string | null
+  observations?: string | null
 }
 
 async function fetchWorkUpdates(workId: string) {
@@ -20,8 +28,27 @@ async function fetchWorkUpdates(workId: string) {
   return data as WorkUpdate[]
 }
 
-async function createWorkUpdate(input: WorkUpdateInput & { organization_id: string }) {
-  const { data, error } = await supabase.from('work_updates').insert(input).select().single()
+async function createWorkUpdate(input: WorkUpdateInput) {
+  const { data, error } = await supabase
+    .from('work_updates')
+    .insert({
+      work_id: input.work_id,
+      organization_id: input.organization_id,
+      description: input.description,
+      photo_url: input.photo_url || null,
+      photo_urls: input.photo_urls && input.photo_urls.length > 0 ? input.photo_urls : null,
+      stage_id: input.stage_id || null,
+      author_name: input.author_name || null,
+      report_date: input.report_date || null,
+      responsible: input.responsible || null,
+      activities_done: input.activities_done || null,
+      issues: input.issues || null,
+      next_activities: input.next_activities || null,
+      observations: input.observations || null,
+    })
+    .select()
+    .single()
+
   if (error) throw error
   return data as WorkUpdate
 }
@@ -34,9 +61,21 @@ async function deleteWorkUpdate(id: string) {
 export async function uploadPhoto(organizationId: string, workId: string, file: File) {
   const path = `${organizationId}/${workId}/${Date.now()}-${file.name}`
   const { error } = await supabase.storage.from('obra-fotos').upload(path, file)
-  if (error) throw error
+  if (error) {
+    console.error('Erro no upload da foto:', error)
+    throw error
+  }
   const { data } = supabase.storage.from('obra-fotos').getPublicUrl(path)
   return data.publicUrl
+}
+
+export async function uploadMultiplePhotos(organizationId: string, workId: string, files: File[]) {
+  const urls: string[] = []
+  for (const file of files) {
+    const url = await uploadPhoto(organizationId, workId, file)
+    urls.push(url)
+  }
+  return urls
 }
 
 export function useWorkUpdates(workId: string | undefined) {

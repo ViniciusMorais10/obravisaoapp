@@ -96,6 +96,7 @@ export interface TeamMember {
   phone: string | null
   email: string | null
   role: string
+  daily_rate: number | null
   notes: string | null
   is_active: boolean
   created_at: string
@@ -140,7 +141,14 @@ export interface WorkUpdate {
   stage_id: string | null
   description: string
   photo_url: string | null
+  photo_urls: string[] | null
   author_name: string | null
+  report_date: string | null
+  responsible: string | null
+  activities_done: string | null
+  issues: string | null
+  next_activities: string | null
+  observations: string | null
   created_at: string
 }
 

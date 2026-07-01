@@ -1,6 +1,7 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { Building2, LayoutDashboard, HardHat, DollarSign, Truck, Users, LogOut } from 'lucide-react'
+import { LayoutDashboard, HardHat, DollarSign, Truck, Users, LogOut } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import ObraVisaoLogo from '../ui/ObraVisaoLogo'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -18,7 +19,7 @@ export default function AppLayout() {
       {/* Mobile header */}
       <header className="sticky top-0 z-10 flex items-center justify-between bg-slate-800 px-4 py-3 text-white lg:hidden">
         <div className="flex items-center gap-2">
-          <Building2 className="h-5 w-5" />
+          <ObraVisaoLogo size={28} />
           <span className="font-semibold">ObraVisão</span>
         </div>
         <button onClick={signOut} className="rounded p-1 hover:bg-slate-700" title="Sair">
@@ -27,13 +28,13 @@ export default function AppLayout() {
       </header>
 
       {/* Desktop sidebar */}
-      <aside className="hidden w-56 shrink-0 bg-slate-800 lg:flex lg:flex-col">
+      <aside className="hidden w-56 shrink-0 bg-slate-800 lg:flex lg:flex-col lg:fixed lg:inset-y-0">
         <div className="flex items-center gap-2 px-4 py-4 text-white">
-          <Building2 className="h-6 w-6" />
+          <ObraVisaoLogo size={36} />
           <span className="text-lg font-semibold">ObraVisão</span>
         </div>
 
-        <nav className="mt-4 flex-1 space-y-1 px-2">
+        <nav className="mt-4 flex-1 overflow-y-auto space-y-1 px-2">
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end className={({ isActive }) => `flex items-center gap-2 rounded-md px-3 py-2 text-sm ${isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
               <Icon className="h-4 w-4" />
@@ -52,7 +53,7 @@ export default function AppLayout() {
       </aside>
 
       {/* Conteúdo principal */}
-      <main className="flex-1 overflow-x-hidden px-4 pb-20 pt-4 lg:px-6 lg:pb-6 lg:pt-6">
+      <main className="flex-1 overflow-x-hidden px-4 pb-20 pt-4 lg:ml-56 lg:px-6 lg:pb-6 lg:pt-6">
         <Outlet />
       </main>
 

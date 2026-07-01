@@ -12,10 +12,13 @@ const schema = z.object({
   custom_role: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().optional(),
+  daily_rate: z.string().optional(),
   notes: z.string().optional(),
 })
 
 type FormData = z.infer<typeof schema>
+
+const predefinedRoles = ['pedreiro', 'ajudante', 'eletricista', 'encanador', 'pintor', 'mestre_de_obra', 'engenheiro', 'arquiteto', 'outro']
 
 export default function TeamMemberForm() {
   const { id } = useParams()
@@ -33,8 +36,6 @@ export default function TeamMemberForm() {
 
   const selectedRole = watch('role')
 
-  const predefinedRoles = ['pedreiro', 'ajudante', 'eletricista', 'encanador', 'pintor', 'mestre_de_obra', 'engenheiro', 'arquiteto', 'outro']
-
   useEffect(() => {
     if (member) {
       const isPredefined = predefinedRoles.includes(member.role)
@@ -44,6 +45,7 @@ export default function TeamMemberForm() {
         custom_role: isPredefined ? '' : member.role,
         phone: member.phone ?? '',
         email: member.email ?? '',
+        daily_rate: member.daily_rate != null ? String(member.daily_rate) : '',
         notes: member.notes ?? '',
       })
     }
@@ -56,6 +58,7 @@ export default function TeamMemberForm() {
       role: finalRole,
       phone: data.phone || null,
       email: data.email || null,
+      daily_rate: data.daily_rate ? parseFloat(data.daily_rate) : null,
       notes: data.notes || null,
     }
 
@@ -95,6 +98,21 @@ export default function TeamMemberForm() {
             <input {...register('custom_role')} placeholder="Digite a função" className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none" />
           )}
           {errors.role && <p className="mt-1 text-xs text-red-600">{errors.role.message}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Valor da diária</label>
+          <div className="relative mt-1">
+            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-400">R$</span>
+            <input
+              {...register('daily_rate')}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0,00"
+              className="w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-slate-500 focus:outline-none"
+            />
+          </div>
         </div>
 
         <div>
